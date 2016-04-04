@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from scipy.stats import mode
 
 class KNearestNeighbor(object):
   """ a kNN classifier with L2 distance """
@@ -170,7 +171,13 @@ class KNearestNeighbor(object):
       # neighbors. Store these labels in closest_y.                           #
       # Hint: Look up the function numpy.argsort.                             #
       #########################################################################
-      pass
+      cur_dists = dists[i]
+      # could be smarter here about tracking just top k smallest vs. sorting
+      # whole array
+      indexes = np.argsort(dists[i])
+      indexes = indexes[:k] # throw out all but the top k
+      [closest_y.append(self.y_train[idx]) for idx in indexes]
+
       #########################################################################
       # TODO:                                                                 #
       # Now that you have found the labels of the k nearest neighbors, you    #
@@ -178,7 +185,9 @@ class KNearestNeighbor(object):
       # Store this label in y_pred[i]. Break ties by choosing the smaller     #
       # label.                                                                #
       #########################################################################
+      y_pred[i] = mode(closest_y)[0][0]
       pass
+    
       #########################################################################
       #                           END OF YOUR CODE                            # 
       #########################################################################
