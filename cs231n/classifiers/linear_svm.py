@@ -101,6 +101,17 @@ def svm_loss_vectorized(W, X, y, reg):
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
   #############################################################################
+  # we've got the scores vector already as scores_diff
+  # now change from scores to either just 1's or -Ks
+  scores_diff[scores_diff > 0] = 1
+  correct_label_vals = scores_diff.sum(axis=1) * -1
+  scores_diff[correct_label_score_idxes] = correct_label_vals
+
+  dW = X.T.dot(scores_diff)
+  dW /= num_train
+  # add the regularization contribution to the gradient
+  dW += reg * W
+  
   pass
   #############################################################################
   #                             END OF YOUR CODE                              #
