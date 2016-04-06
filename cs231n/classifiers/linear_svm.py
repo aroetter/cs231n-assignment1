@@ -48,16 +48,8 @@ def svm_loss_naive(W, X, y, reg):
 
   # Add regularization to the loss.
   loss += 0.5 * reg * np.sum(W * W)
-
-  #############################################################################
-  # TODO:                                                                     #
-  # Compute the gradient of the loss function and store it dW.                #
-  # Rather that first computing the loss and then computing the derivative,   #
-  # it may be simpler to compute the derivative at the same time that the     #
-  # loss is being computed. As a result you may need to modify some of the    #
-  # code above to compute the gradient.                                       #
-  #############################################################################
-
+  # that contribues to the gradient as well
+  dW += reg * W
 
   return loss, dW
 
@@ -71,6 +63,11 @@ def svm_loss_vectorized(W, X, y, reg):
   loss = 0.0
   dW = np.zeros(W.shape) # initialize the gradient as zero
 
+  # scrap = X.dot(W) # yields 500,10
+  # an array of N x C, where entry is the loss from the nth data pt due
+  # to it's score against the cth class
+  # print "Sanity check scrap=", scrap.shape
+  
   #############################################################################
   # TODO:                                                                     #
   # Implement a vectorized version of the structured SVM loss, storing the    #
