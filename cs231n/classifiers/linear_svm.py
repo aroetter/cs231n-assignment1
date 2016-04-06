@@ -29,8 +29,6 @@ def svm_loss_naive(W, X, y, reg):
     scores = X[i].dot(W)
     correct_class_score = scores[y[i]]
 
-    # how many data pts contributed to the loss for this class?
-    num_loss_contributors = 0
     for j in xrange(num_classes):
       if j == y[i]:
         continue
@@ -40,9 +38,8 @@ def svm_loss_naive(W, X, y, reg):
         # we'll end up adding X[i] to the jth column for every X[i] that
         # contributed to the loss
         dW[:, j] += X[i]
-        # okay, this data pt contributes to loss for this class
-        num_loss_contributors += 1
-    dW[:, y[i]] -= num_loss_contributors * X[i]
+        # this will trigger K times if K classes were wrong enough to add loss
+        dW[:, y[i]] -= X[i]
 
   # Right now the loss is a sum over all training examples, but we want it
   # to be an average instead so we divide by num_train.
