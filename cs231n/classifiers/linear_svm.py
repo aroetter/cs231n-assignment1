@@ -89,6 +89,8 @@ def svm_loss_vectorized(W, X, y, reg):
   loss = scores_diff.sum()
   num_train = X.shape[0]
   loss /= num_train
+  # add in the regularization part.
+  loss += 0.5 * reg * np.sum(W * W)
   
   #############################################################################
   # TODO:                                                                     #
