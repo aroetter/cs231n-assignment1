@@ -63,36 +63,24 @@ def svm_loss_vectorized(W, X, y, reg):
   loss = 0.0
   dW = np.zeros(W.shape) # initialize the gradient as zero
 
+  # Vectorized version of the SVM loss
   # an array of N x C, where entry is the loss from the nth data pt due
-  # to it's score against the cth class
-  scores = X.dot(W) # yields 500,10
-  #print "Sanity check scores=", scores.shape
+  # to its score against the cth class
+  scores = X.dot(W)
 
+  # length of this vector is N, one correct label score per datapt
   correct_label_scores = scores[range(scores.shape[0]), y]
 
-  # now reshape that to be wide, subtract from all items
-  # print "scores shape is: ", scores.shape # should be 500, 10
-  # print "Correct_label_scores shape is: ", correct_label_scores.shape # should be 500
   # subtract correct scores (as a column vector) from every cell
-  # TODO patch up w/o tmp variable
-  tmp = np.reshape(correct_label_scores, (-1, 1))
-  print "tmp shape is (should be 500,1)): ", tmp.shape
-  scores_diff = scores - tmp
+  scores_diff = scores - np.reshape(correct_label_scores, (-1, 1))
   
   # add 1 for the margin.
   scores_diff += 1
   
   # now zero out all the loss scores for the correct classes.
-  ##print "correct classes for top 2 rows are:"
-  ##print y[:2]
-  ##print "top 2 rows of scores_diff is..."
-  ##print scores_diff[:2,:]
   scores_diff[range(scores_diff.shape[0]), y] = 0
 
-  ##print "top 2 rows of scores_diff is..."
-  print scores_diff[11:15,:]
-
-  # now zero out all elements less than zero.
+  # now zero out all elements less than zero. (b/c of the max() in the hinge)
   indexes_of_neg_nums = np.nonzero(scores_diff < 0)
   scores_diff[indexes_of_neg_nums] = 0
   
@@ -101,17 +89,6 @@ def svm_loss_vectorized(W, X, y, reg):
   num_train = X.shape[0]
   loss /= num_train
   
-  #############################################################################
-  # TODO:                                                                     #
-  # Implement a vectorized version of the structured SVM loss, storing the    #
-  # result in loss.                                                           #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
-
-
   #############################################################################
   # TODO:                                                                     #
   # Implement a vectorized version of the gradient for the structured SVM     #
