@@ -32,9 +32,8 @@ def softmax_loss_naive(W, X, y, reg):
   #############################################################################
   # gives an N x C matrix.
   scores = X.dot(W)
-  offset = np.max(scores)
   # make largest value here zero, just for numeric stability
-  scores -= offset
+  scores -= np.max(scores)
   
   num_train = X.shape[0]
   num_classes = W.shape[1]
@@ -47,13 +46,14 @@ def softmax_loss_naive(W, X, y, reg):
     l_i = -1 * scores[i, y[i]] + math.log(denom)
     loss += l_i
 
-    # try to compute dW_ij.
+    # now compute the gradient of the loss wrt the i,jth weight (the
+    # weight for the ith data pt on the jth class)
     # i just manually took the derivative of:
     # L_i = -f(yi) + log(sum over j(e^f(j))
-    # i think that yields
-    # dW (wrt w_dj) = x_d (if j is the correct class (y_i)
-    #                 + 1/(sum over j e^f(j)) * e^f(j)*d_d
-    # here x_d is the dth dimension of the ith data pt x (really called x_i_d)
+    # which yields
+    # dW_ij = 1{j=y(i)} * -1 * x_i
+    #         + 1/(sum over j e^f(j)) * e^f(j)*x_i
+    # 
     for j in xrange(num_classes):
       dW[:, j] += (1 / denom) * math.exp(scores[i, j]) * X[i]
       if j == y[i]:
@@ -65,11 +65,6 @@ def softmax_loss_naive(W, X, y, reg):
   # add in the regularization loss
   loss += 0.5 * reg * np.sum(W * W)
   dW += reg * W
-  pass
-
-  # okay, now compute the dW with loops.
-  # W is a D x C matrix, so is dW.
-  
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
