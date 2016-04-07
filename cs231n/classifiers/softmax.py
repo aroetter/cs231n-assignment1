@@ -32,8 +32,9 @@ def softmax_loss_naive(W, X, y, reg):
   #############################################################################
   # gives an N x C matrix.
   scores = X.dot(W)
+  offset = np.max(scores)
   # make largest value here zero, just for numeric stability
-  scores -= np.max(scores)
+  scores -= offset
   
   num_train = X.shape[0]
   num_classes = W.shape[1]
