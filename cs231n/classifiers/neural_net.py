@@ -69,7 +69,6 @@ class TwoLayerNet(object):
     N, D = X.shape
 
     # Compute the forward pass
-    scores = None
     #############################################################################
     # TODO: Perform the forward pass, computing the class scores for the input. #
     # Store the result in the scores variable, which should be an array of      #
@@ -138,27 +137,18 @@ class TwoLayerNet(object):
     #
     # dLoss/dW2 = dLoss/dScores * dScores/dW2
     #           = dscores       * hidden_scores
-    #print "ALEX desired shape of dW2 is ", W2.shape
-
-    #print "ALEX shape of hidden_scores is ", hidden_scores.shape
     grads['W2'] = hidden_scores.T.dot(dscores)
 
     # dLoss/dB2 = dLoss/dScores * dScores/dB2
-    #print "ALEX desired shape of gradient of b2 is ", b2.shape
     grads['b2'] = dscores.sum(axis=0)
 
     # dLoss/dHidden = dLoss/dScores * dScores/dHidden
     #               = dscores       * W2
-    # print "ALEX desired shape of dHidden is ", hidden_scores.shape
-
-    # print "ALEX shape of dscores is ", dscores.shape
     dHidden = dscores.dot(W2.T)
 
-    # okay now we've got to get past this max thing.
     # hidden_scores = max(0, layer1scores)
     # dLoss/dlayer1scores = dLoss/dHidden * dHidden/dLayer1Scores
     # dHidden/dLayer1Scores = 1 if layer1Scores > 0, 0 otherwise
-    # print "ALEX got layer1scores =  ", layer1scores
     dHidden_dLayer1 = np.zeros_like(layer1scores)
     dHidden_dLayer1[layer1scores > 0] = 1
 
@@ -166,7 +156,6 @@ class TwoLayerNet(object):
     # dLayer1scores = dHidden * dHidden_dLayer1
     # note this is an element wise multiply
     dLayer1Scores = dHidden * dHidden_dLayer1
-    # print "ALEX got result dLayer1scores = ", dLayer1scores
 
     # Layer1Scores = W1 * X + B1
     # dLoss/dW1 = dLoss/dLayer1Scores * dLayer1Scores/dW1
@@ -176,13 +165,10 @@ class TwoLayerNet(object):
     # dLoss/dB1 = dLoss/dLayer1Scores * dLayer1Scores/B1
     #           = dLayer1Scores * 1
     grads['b1'] = dLayer1Scores.sum(axis=0)
-    print "ALEX desired shape of dB1 is ", b1.shape
-    print "ALEX got shape for dLayer1scores = ", dLayer1Scores.shape
 
-    # TODOTODOTODO add in gradient on W1 and W2 for regularization
-    
-    
-    pass
+    # gradient due to the regularization term on the loss function
+    grads['W1'] += reg * W1
+    grads['W2'] += reg * W2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
