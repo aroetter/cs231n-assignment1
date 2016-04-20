@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 class TwoLayerNet(object):
   """
   A two-layer fully-connected neural network. The net has an input dimension of
-  N, a hidden layer dimension of H, and performs classification over C classes.
+  N (aroetter: I think you mean D),
+  a hidden layer dimension of H, and performs classification over C classes.
   We train the network with a softmax loss function and L2 regularization on the
   weight matrices. The network uses a ReLU nonlinearity after the first fully
   connected layer.
@@ -74,7 +75,10 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    layer1scores = X.dot(W1) + b1 # this yields an N x H matrix
+    hidden_scores = np.maximum(layer1scores, np.zeros_like(layer1scores))
+    # can also replace the "zeros_like" with just 0.
+    scores = hidden_scores.dot(W2) + b2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -92,7 +96,24 @@ class TwoLayerNet(object):
     # classifier loss. So that your results match ours, multiply the            #
     # regularization loss by 0.5                                                #
     #############################################################################
-    pass
+    num_classes = W2.shape[1]
+
+    # softmax loss (copied from softmax.py)
+    scores -=np.max(scores) # make largest value 0 here, for stability
+    expscores = np.exp(scores)
+    denoms = expscores.sum(axis=1)
+
+    # copy the denominator into num_columns copies for the division
+    # there is probably a better way todo this with broadcasting, etc.
+    denoms = np.tile(denoms, (3, 1)).T
+
+    probs = expscores / denoms
+    loss_contributors = probs[range(N), y]
+    loss = -1 * np.log(loss_contributors).sum() / N
+
+    # regularization loss
+    loss += 0.5 * reg * np.sum(W1 * W1)
+    loss += 0.5 * reg * np.sum(W2 * W2)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -104,6 +125,63 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
+    # dLoss / dscores
+    # THIS IS BLACK MAGIC, FIGURE THIS OUT PLEASE
+    dscores = probs
+    dscores[range(N), y] -= 1
+    dscores /= N
+
+    # now i need dW1, dW2, db1, db2
+
+    # remember from above: scores = W2 * hidden_scores + B2
+    # so .. dScores/dW2 = hidden_scores && dScores/dB2 = 1
+    #
+    # dLoss/dW2 = dLoss/dScores * dScores/dW2
+    #           = dscores       * hidden_scores
+    #print "ALEX desired shape of dW2 is ", W2.shape
+
+    #print "ALEX shape of hidden_scores is ", hidden_scores.shape
+    grads['W2'] = hidden_scores.T.dot(dscores)
+
+    # dLoss/dB2 = dLoss/dScores * dScores/dB2
+    #print "ALEX desired shape of gradient of b2 is ", b2.shape
+    grads['b2'] = dscores.sum(axis=0)
+
+    # dLoss/dHidden = dLoss/dScores * dScores/dHidden
+    #               = dscores       * W2
+    # print "ALEX desired shape of dHidden is ", hidden_scores.shape
+
+    # print "ALEX shape of dscores is ", dscores.shape
+    dHidden = dscores.dot(W2.T)
+
+    # okay now we've got to get past this max thing.
+    # hidden_scores = max(0, layer1scores)
+    # dLoss/dlayer1scores = dLoss/dHidden * dHidden/dLayer1Scores
+    # dHidden/dLayer1Scores = 1 if layer1Scores > 0, 0 otherwise
+    # print "ALEX got layer1scores =  ", layer1scores
+    dHidden_dLayer1 = np.zeros_like(layer1scores)
+    dHidden_dLayer1[layer1scores > 0] = 1
+
+    # TODO confirm this is correct
+    # dLayer1scores = dHidden * dHidden_dLayer1
+    # note this is an element wise multiply
+    dLayer1Scores = dHidden * dHidden_dLayer1
+    # print "ALEX got result dLayer1scores = ", dLayer1scores
+
+    # Layer1Scores = W1 * X + B1
+    # dLoss/dW1 = dLoss/dLayer1Scores * dLayer1Scores/dW1
+    #           = dLayer1Scores * X
+    grads['W1'] = X.T.dot(dLayer1Scores)
+
+    # dLoss/dB1 = dLoss/dLayer1Scores * dLayer1Scores/B1
+    #           = dLayer1Scores * 1
+    grads['b1'] = dLayer1Scores.sum(axis=0)
+    print "ALEX desired shape of dB1 is ", b1.shape
+    print "ALEX got shape for dLayer1scores = ", dLayer1Scores.shape
+
+    # TODOTODOTODO add in gradient on W1 and W2 for regularization
+    
+    
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
