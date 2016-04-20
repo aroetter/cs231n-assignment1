@@ -128,7 +128,9 @@ class TwoLayerNet(object):
     # THIS IS BLACK MAGIC, FIGURE THIS OUT PLEASE
     dscores = probs
     dscores[range(N), y] -= 1
-    dscores /= N
+    print "ALEX shape of dscores (dLoss/dScores): ", dscores.shape
+    # size is N(5) x num_classes(3)
+    dscores /= N # makes sense b/c you want average for one data pt only
 
     # now i need dW1, dW2, db1, db2
 
@@ -140,6 +142,7 @@ class TwoLayerNet(object):
     grads['W2'] = hidden_scores.T.dot(dscores)
 
     # dLoss/dB2 = dLoss/dScores * dScores/dB2
+    #             dscores       * 1
     grads['b2'] = dscores.sum(axis=0)
 
     # dLoss/dHidden = dLoss/dScores * dScores/dHidden
@@ -151,8 +154,6 @@ class TwoLayerNet(object):
     # dHidden/dLayer1Scores = 1 if layer1Scores > 0, 0 otherwise
     dHidden_dLayer1 = np.zeros_like(layer1scores)
     dHidden_dLayer1[layer1scores > 0] = 1
-
-    # TODO confirm this is correct
     # dLayer1scores = dHidden * dHidden_dLayer1
     # note this is an element wise multiply
     dLayer1Scores = dHidden * dHidden_dLayer1
