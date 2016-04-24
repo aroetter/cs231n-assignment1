@@ -75,6 +75,7 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
     layer1scores = X.dot(W1) + b1 # this yields an N x H matrix
+    # TODO aroetter do this...
     hidden_scores = np.maximum(layer1scores, np.zeros_like(layer1scores))
     # can also replace the "zeros_like" with just 0.
     scores = hidden_scores.dot(W2) + b2
@@ -125,10 +126,13 @@ class TwoLayerNet(object):
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
     # dLoss / dscores
-    # THIS IS BLACK MAGIC, FIGURE THIS OUT PLEASE
+    # to understand this, via chain rule:
+    # dLoss/dscores = dLoss/dProb * dProb/dscores
+    # now solve above analytically, latter term has 2 cases, one for the
+    # score being the score of the correct class, one when the score is
+    # for an incorrect class, so it only shows up in the denominator sum.
     dscores = probs
     dscores[range(N), y] -= 1
-    # size is N(5) x num_classes(3)
     dscores /= N # makes sense b/c you want average for one data pt only
 
     # now i need dW1, dW2, db1, db2
@@ -212,7 +216,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+      batch_idxes = np.random.choice(num_train, batch_size, replace=True)
+      X_batch = X[batch_idxes, :]
+      y_batch = y[batch_idxes]
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -227,7 +233,10 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      self.params['W1'] -= learning_rate * grads['W1']
+      self.params['b1'] -= learning_rate * grads['b1']
+      self.params['W2'] -= learning_rate * grads['W2']
+      self.params['b2'] -= learning_rate * grads['b2']
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -272,7 +281,13 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    pass
+    # Unpack variables from the params dictionary
+    W1, b1 = self.params['W1'], self.params['b1']
+    W2, b2 = self.params['W2'], self.params['b2']
+
+    scores = np.maximum(X.dot(W1) +  b1, 0).dot(W2) + b2
+    # scores is N x C.
+    y_pred = np.argmax(scores, axis=1)
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
