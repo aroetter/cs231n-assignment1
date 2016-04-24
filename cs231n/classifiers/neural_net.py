@@ -75,9 +75,7 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
     layer1scores = X.dot(W1) + b1 # this yields an N x H matrix
-    # TODO aroetter do this...
-    hidden_scores = np.maximum(layer1scores, np.zeros_like(layer1scores))
-    # can also replace the "zeros_like" with just 0.
+    hidden_scores = np.maximum(layer1scores, 0)
     scores = hidden_scores.dot(W2) + b2
     #############################################################################
     #                              END OF YOUR CODE                             #
