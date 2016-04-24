@@ -103,7 +103,7 @@ class TwoLayerNet(object):
 
     # copy the denominator into num_columns copies for the division
     # there is probably a better way todo this with broadcasting, etc.
-    denoms = np.tile(denoms, (3, 1)).T
+    denoms = np.tile(denoms, (expscores.shape[1], 1)).T
 
     probs = expscores / denoms
     loss_contributors = probs[range(N), y]
