@@ -128,7 +128,6 @@ class TwoLayerNet(object):
     # THIS IS BLACK MAGIC, FIGURE THIS OUT PLEASE
     dscores = probs
     dscores[range(N), y] -= 1
-    print "ALEX shape of dscores (dLoss/dScores): ", dscores.shape
     # size is N(5) x num_classes(3)
     dscores /= N # makes sense b/c you want average for one data pt only
 
